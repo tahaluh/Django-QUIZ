@@ -9,7 +9,7 @@ class Quiz(BaseModel):
     is_published = models.BooleanField(default=False)
 
     creator_uuid = models.ForeignKey(
-        User, on_delete=models.CASCADE, to_field='uuid')
+        User, related_name="creator",  on_delete=models.CASCADE, to_field='uuid')  # noqa E501
 
     deleted_at = models.DateTimeField(null=True, blank=True)
 
@@ -21,13 +21,13 @@ class Question(BaseModel):
     question = models.CharField(max_length=255)
 
     quiz_uuid = models.ForeignKey(
-        Quiz, on_delete=models.CASCADE, to_field='uuid')
+        Quiz, related_name='questions', on_delete=models.CASCADE, to_field='uuid')  # noqa E501
 
 
 class Option(BaseModel):
     option = models.CharField(max_length=255)
 
     question_uuid = models.ForeignKey(
-        Question, on_delete=models.CASCADE, to_field='uuid')
+        Question, related_name='options', on_delete=models.CASCADE, to_field='uuid')  # noqa E501
 
     correct_option = models.BooleanField(default=False)

@@ -16,16 +16,12 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from django.http import HttpResponse
-
-
-def index(request):
-    return HttpResponse("Hello, world. You're at the quizProject index.")
+from quiz.urls import router
 
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', index),
-    path('api/v1/', include('quiz.urls')),
     path('auth/', include('rest_framework.urls')),
+    path('api/v1/', include('quiz.urls')),
+    path('api/v2/', include(router.urls)),
 ]
