@@ -16,12 +16,15 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from quiz.urls import router
+from quiz.urls import router as quiz_router
 
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('auth/', include('rest_framework.urls')),
-    path('api/v1/', include('quiz.urls')),
-    path('api/v2/', include(router.urls)),
+    # path('api/v1/', include('quiz.urls')),
+
+    path('api/', include(quiz_router.urls)),
+    path('api/auth/', include('authentication.urls')),
+    path('api/', include('user.urls')),
+
 ]
