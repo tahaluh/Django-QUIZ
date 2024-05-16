@@ -9,7 +9,7 @@ class Quiz(BaseModel):
     is_published = models.BooleanField(default=False)
 
     creator = models.ForeignKey(
-        User, related_name="creator",  on_delete=models.CASCADE, to_field='uuid')  # noqa E501
+        User, related_name="quizzes",  on_delete=models.CASCADE, to_field='uuid')  # noqa E501
 
     deleted_at = models.DateTimeField(null=True, blank=True)
 

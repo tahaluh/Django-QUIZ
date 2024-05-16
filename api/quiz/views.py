@@ -1,8 +1,73 @@
-from rest_framework import generics, viewsets, mixins, decorators, response, status
+from rest_framework import viewsets, mixins, decorators, response, status
 from .models import Quiz, Question, Option
 from .serializers import QuizSerializer, QuestionSerializer, OptionSerializer
+from rest_framework.permissions import IsAuthenticated, AllowAny
 
 
+class QuizViewSet(mixins.CreateModelMixin, mixins.RetrieveModelMixin, mixins.UpdateModelMixin, mixins.DestroyModelMixin, mixins.ListModelMixin, viewsets.GenericViewSet):  # noqa E501
+    queryset = Quiz.objects.all()
+    serializer_class = QuizSerializer
+
+    def get_permissions(self):
+        if self.action == 'list':
+            permission_classes = [AllowAny]
+        else:
+            permission_classes = [IsAuthenticated]
+        return [permission() for permission in permission_classes]
+
+    def get_queryset(self):
+        if self.action == 'list' and self.request.user.is_authenticated:
+            return self.queryset.filter(creator=self.request.user)
+        else:
+            return self.queryset.filter(is_published=True)
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save(creator=request.user)
+            return response.Response(serializer.data, status=status.HTTP_201_CREATED)  # noqa E501
+        else:
+            return response.Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)  # noqa E501
+
+    def delete(self, request, *args, **kwargs):
+        quiz = self.get_object()
+        if quiz.creator == request.user:
+            quiz.delete()
+            return response.Response(status=status.HTTP_204_NO_CONTENT)
+        return response.Response(status=status.HTTP_403_FORBIDDEN)
+
+    @decorators.action(detail=False, methods=['get'])
+    def mine(self, request):
+        queryset = self.get_queryset()
+        serializer = self.get_serializer(queryset, many=True)
+        return response.Response(serializer.data)
+
+    @decorators.action(detail=True, methods=['get'])
+    def questions(self, request, pk=None):
+        quiz = self.get_object()
+        serializer = QuestionSerializer(quiz.questions.all(), many=True)
+        return response.Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class QuestionViewSet(viewsets.ModelViewSet):
+    queryset = Question.objects.all()
+    serializer_class = QuestionSerializer
+    permission_classes = [IsAuthenticated]
+
+    @decorators.action(detail=True, methods=['get'])
+    def options(self, request, pk=None):
+        question = self.get_object()
+        serializer = OptionSerializer(question.options.all(), many=True)
+        return response.Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class OptionViewSet(viewsets.ModelViewSet):
+    queryset = Option.objects.all()
+    serializer_class = OptionSerializer
+    permission_classes = [IsAuthenticated]
+
+
+''' V1
 class QuizzesAPIView(generics.ListCreateAPIView):
     queryset = Quiz.objects.all()
     serializer_class = QuizSerializer
@@ -45,7 +110,6 @@ class OptionAPIView(generics.RetrieveUpdateDestroyAPIView):
 
 # v2
 
-'''
 class QuizViewSet(viewsets.ModelViewSet):
     queryset = Quiz.objects.all()
     serializer_class = QuizSerializer
@@ -56,35 +120,3 @@ class QuizViewSet(viewsets.ModelViewSet):
         serializer = QuestionSerializer(quiz.questions.all(), many=True)
         return response.Response(serializer.data, status=status.HTTP_200_OK)
 '''
-
-# Customizing the QuizViewSet to use mixins
-
-
-class QuizViewSet(mixins.CreateModelMixin, mixins.RetrieveModelMixin, mixins.UpdateModelMixin, mixins.DestroyModelMixin, mixins.ListModelMixin, viewsets.GenericViewSet):  # noqa E501
-    queryset = Quiz.objects.all()
-    serializer_class = QuizSerializer
-
-    def get_queryset(self):
-        return self.queryset.filter(is_published=True)
-
-    @decorators.action(detail=True, methods=['get'])
-    def questions(self, request, pk=None):
-        quiz = self.get_object()
-        serializer = QuestionSerializer(quiz.questions.all(), many=True)
-        return response.Response(serializer.data, status=status.HTTP_200_OK)
-
-
-class QuestionViewSet(viewsets.ModelViewSet):
-    queryset = Question.objects.all()
-    serializer_class = QuestionSerializer
-
-    @decorators.action(detail=True, methods=['get'])
-    def options(self, request, pk=None):
-        question = self.get_object()
-        serializer = OptionSerializer(question.options.all(), many=True)
-        return response.Response(serializer.data, status=status.HTTP_200_OK)
-
-
-class OptionViewSet(viewsets.ModelViewSet):
-    queryset = Option.objects.all()
-    serializer_class = OptionSerializer
