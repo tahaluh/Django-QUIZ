@@ -12,33 +12,26 @@ import {
 } from '@chakra-ui/react';
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ACCESS_TOKEN, REFRESH_TOKEN } from "../../constants";
-import { Login } from './services.tsx/login';
 import Routes from '../../routes/Routes';
+import { useAuth } from './AuthProvider';
 
 export default function LoginCard() {
-    const [loading, setLoading] = useState(false);
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const navigate = useNavigate();
+    const { isLoading, login } = useAuth();
+
 
     const handleLogin = async () => {
-        setLoading(true);
-        const res = await Login({
-            email,
-            password
-        });
-
-        if (res.error) {
-            console.error(res.error);
-            setLoading(false);
+        if (!email || !password) {
             return;
         }
 
-        localStorage.setItem(ACCESS_TOKEN, res.data.access);
-        localStorage.setItem(REFRESH_TOKEN, res.data.refresh);
+        const loged = await login(email, password)
 
-        navigate(Routes.home);
+        if (loged) {
+            navigate(Routes.home);
+        }
     };
 
     return (
@@ -84,6 +77,7 @@ export default function LoginCard() {
                                     bg: 'blue.500',
                                 }}
                                 onClick={handleLogin}
+                                isLoading={isLoading}
                             >
                                 Sign in
                             </Button>

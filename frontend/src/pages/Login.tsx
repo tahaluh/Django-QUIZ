@@ -5,7 +5,7 @@ import Page from "../template/components/Page";
 function LoginPage() {
     return (
         <Page title="Login">
-            <Container maxW={'xl'}>
+            <Container minW={"100vw"}>
                 <LoginCard />
             </Container>
         </Page>
