@@ -16,10 +16,9 @@ import {
 } from '@chakra-ui/react';
 import { ViewIcon, ViewOffIcon } from '@chakra-ui/icons';
 import { useState } from "react";
-import api from "../../api";
 import { useNavigate } from "react-router-dom";
-import { ACCESS_TOKEN, REFRESH_TOKEN } from "../../constants";
 import Routes from '../../routes/Routes';
+import { Register } from './services.tsx/register';
 
 export default function SignupCard() {
     const [loading, setLoading] = useState(false);
@@ -34,19 +33,21 @@ export default function SignupCard() {
     const handleSignup = async (e: any) => {
         setLoading(true);
         e.preventDefault();
-        try {
-            const res = await api.post('/auth/signup', {
-                firstName,
-                lastName,
-                email,
-                password
-            });
-            navigate(Routes.auth.login);
-        } catch (error) {
-            console.error(error);
-        } finally {
+
+        const res = await Register({
+            first_name: firstName,
+            last_name: lastName,
+            email,
+            password
+        });
+
+        if (res.error) {
+            console.error(res.error);
             setLoading(false);
+            return;
         }
+
+        navigate(Routes.auth.login);
     };
 
     return (

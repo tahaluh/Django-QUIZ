@@ -4,18 +4,18 @@ import {
     FormControl,
     FormLabel,
     Input,
-    Checkbox,
     Stack,
     Link,
     Button,
     Heading,
-    Text,
     useColorModeValue,
 } from '@chakra-ui/react';
 import { useState } from "react";
-import api from "../../api";
 import { useNavigate } from "react-router-dom";
 import { ACCESS_TOKEN, REFRESH_TOKEN } from "../../constants";
+import api from '../../services/api';
+import { apiRoutes } from '../../services/apiRoutes';
+import { Register } from './services.tsx/register';
 
 export default function LoginCard() {
     const [email, setEmail] = useState('');
@@ -24,7 +24,10 @@ export default function LoginCard() {
 
     const handleLogin = async () => {
         try {
-            const response = await api.login({ email, password });
+            const response = await api.post(apiRoutes.auth.login, {
+                email,
+                password
+            });
             localStorage.setItem(ACCESS_TOKEN, response.data.accessToken);
             localStorage.setItem(REFRESH_TOKEN, response.data.refreshToken);
             navigate('/');
