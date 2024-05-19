@@ -1,8 +1,6 @@
-import { register } from "module";
-
 export const apiRoutes = {
     auth: {
-        login: 'auth/login',
+        login: 'auth/token/',
         register: 'user/register',
     },
 } as const;

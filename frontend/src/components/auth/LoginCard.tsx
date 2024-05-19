@@ -13,27 +13,32 @@ import {
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ACCESS_TOKEN, REFRESH_TOKEN } from "../../constants";
-import api from '../../services/api';
-import { apiRoutes } from '../../services/apiRoutes';
-import { Register } from './services.tsx/register';
+import { Login } from './services.tsx/login';
+import Routes from '../../routes/Routes';
 
 export default function LoginCard() {
+    const [loading, setLoading] = useState(false);
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const navigate = useNavigate();
 
     const handleLogin = async () => {
-        try {
-            const response = await api.post(apiRoutes.auth.login, {
-                email,
-                password
-            });
-            localStorage.setItem(ACCESS_TOKEN, response.data.accessToken);
-            localStorage.setItem(REFRESH_TOKEN, response.data.refreshToken);
-            navigate('/');
-        } catch (error) {
-            console.error('Error:', error);
+        setLoading(true);
+        const res = await Login({
+            email,
+            password
+        });
+
+        if (res.error) {
+            console.error(res.error);
+            setLoading(false);
+            return;
         }
+
+        localStorage.setItem(ACCESS_TOKEN, res.data.access);
+        localStorage.setItem(REFRESH_TOKEN, res.data.refresh);
+
+        navigate(Routes.home);
     };
 
     return (
