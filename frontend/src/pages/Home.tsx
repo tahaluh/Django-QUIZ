@@ -1,9 +1,16 @@
-function Home () {
+import { Container } from '@chakra-ui/react';
+import Page from '../template/components/Page';
+import Home from '../components/home';
+
+
+function HomePage() {
     return (
-        <div>
-        <h1>Home</h1>
-        </div>
+        <Page title="Home">
+            <Container maxW={'90vw'}>
+                <Home />
+            </Container>
+        </Page >
     );
 }
 
-export default Home;
+export default HomePage;

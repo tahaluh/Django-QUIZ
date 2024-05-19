@@ -17,7 +17,7 @@ const Page = forwardRef<HTMLDivElement, Props>(
                 {meta}
             </Helmet>
 
-            <Box ref={ref} {...other}>
+            <Box ref={ref} {...other} mx={'auto'} >
                 {children}
             </Box>
         </>
