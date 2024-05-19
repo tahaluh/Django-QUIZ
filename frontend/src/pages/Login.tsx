@@ -1,9 +1,15 @@
-function Login () {
+import { Container } from "@chakra-ui/react";
+import LoginCard from "../components/auth/LoginCard";
+import Page from "../template/components/Page";
+
+function LoginPage() {
     return (
-        <div>
-        <h1>Login</h1>
-        </div>
+        <Page title="Login">
+            <Container maxW={'xl'}>
+                <LoginCard />
+            </Container>
+        </Page>
     );
 }
 
-export default Login;
+export default LoginPage;

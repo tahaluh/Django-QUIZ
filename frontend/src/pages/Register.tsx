@@ -1,9 +1,15 @@
-function Register () {
+import { Container } from "@chakra-ui/react";
+import SignupCard from "../components/auth/SignupCard";
+import Page from "../template/components/Page";
+
+function RegisterPage() {
     return (
-        <div>
-        <h1>Register</h1>
-        </div>
+        <Page title="Register">
+            <Container maxW={'xl'}>
+                <SignupCard />
+            </Container>
+        </Page>
     );
 }
 
-export default Register;
+export default RegisterPage;

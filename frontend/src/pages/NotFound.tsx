@@ -3,7 +3,7 @@ import React from 'react';
 import { Box, Heading, Text, Button } from '@chakra-ui/react';
 import { Link as RouterLink } from 'react-router-dom';
 
-const NotFound = () => {
+const NotFoundPage = () => {
   return (
     <Box
       textAlign="center"
@@ -29,4 +29,4 @@ const NotFound = () => {
   );
 }
 
-export default NotFound;
+export default NotFoundPage;
