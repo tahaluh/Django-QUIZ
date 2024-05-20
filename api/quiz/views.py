@@ -36,18 +36,20 @@ class QuizViewSet(mixins.CreateModelMixin, mixins.RetrieveModelMixin, mixins.Upd
             for option_data in options_data:
                 Option.objects.create(question=question, **option_data)
 
-        return response.Response(serializer.data, status=status.HTTP_201_CREATED)
+        return response.Response(serializer.data, status=status.HTTP_201_CREATED)  # noqa E501
 
-    def delete(self, request, *args, **kwargs):
-        quiz = self.get_object()
-        if quiz.creator == request.user:
-            quiz.delete()
-            return response.Response(status=status.HTTP_204_NO_CONTENT)
-        return response.Response(status=status.HTTP_403_FORBIDDEN)
+    def destroy(self, request, *args, **kwargs):
+        quiz = Quiz.objects.get(pk=kwargs['pk'])
+        if quiz is None:
+            return response.Response(status=status.HTTP_404_NOT_FOUND)
+        if quiz.creator != request.user:
+            return response.Response(status=status.HTTP_403_FORBIDDEN)
+        quiz.delete()
+        return response.Response(status=status.HTTP_204_NO_CONTENT)
 
     @decorators.action(detail=False, methods=['get'])
     def mine(self, request):
-        queryset = self.get_queryset()
+        queryset = self.queryset.filter(creator=request.user)
         serializer = self.get_serializer(queryset, many=True)
         return response.Response(serializer.data)
 
@@ -56,6 +58,18 @@ class QuizViewSet(mixins.CreateModelMixin, mixins.RetrieveModelMixin, mixins.Upd
         quiz = self.get_object()
         serializer = QuestionSerializer(quiz.questions.all(), many=True)
         return response.Response(serializer.data, status=status.HTTP_200_OK)
+
+    # a method to togle the is_published field of a quiz
+    @decorators.action(detail=True, methods=['post'])
+    def publish(self, request, pk=None):
+        quiz = self.get_object()
+        if quiz is None:
+            return response.Response(status=status.HTTP_404_NOT_FOUND)
+        if quiz.creator != request.user:
+            return response.Response(status=status.HTTP_403_FORBIDDEN)
+        quiz.is_published = not quiz.is_published
+        quiz.save()
+        return response.Response(status=status.HTTP_200_OK)
 
 
 class QuestionViewSet(viewsets.ModelViewSet):
