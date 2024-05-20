@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import {
     Flex,
     FormControl,
@@ -9,7 +9,9 @@ import {
     Heading,
     Card,
     Grid,
+    IconButton,
 } from '@chakra-ui/react';
+import { CloseIcon } from '@chakra-ui/icons';
 
 interface Question {
     question: string;
@@ -23,7 +25,7 @@ export default function CreateQuizForm() {
     const [gameTitle, setGameTitle] = useState<string>('');
     const [gameDescription, setGameDescription] = useState<string>('');
     const [gameImage, setGameImage] = useState<string>('');
-    const [questions, setQuestions] = useState<Question[]>([{ question: '', options: ['', ''], correctOption: 0 }]);
+    const [questions, setQuestions] = useState<Question[]>([{ question: '', options: ['', '', '', ''], correctOption: 0 }]);
 
     const handleNextStep = () => {
         setStep((prevStep) => {
@@ -39,11 +41,23 @@ export default function CreateQuizForm() {
         })
     };
 
+    const handleJumpToStep = (targetStep: number) => {
+        setStep(targetStep);
+        setQuestionIndex(targetStep - 2);
+    };
+
     const handleAddQuestion = () => {
         const updatedQuestions = [...questions];
-        updatedQuestions.push({ question: '', options: ['', ''], correctOption: 0 });
+        updatedQuestions.push({ question: '', options: ['', '', '', ''], correctOption: 0 });
         setQuestions(updatedQuestions);
+        handleJumpToStep(questions.length + 2);
+    }
 
+    const handleRemoveQuestion = (index: number) => {
+        const updatedQuestions = [...questions];
+        updatedQuestions.splice(index, 1);
+        setQuestions(updatedQuestions);
+        handleJumpToStep(index+1);
     }
 
     const handleQuestionChange = (value: string) => {
@@ -64,14 +78,6 @@ export default function CreateQuizForm() {
         setQuestions(updatedQuestions);
     };
 
-    const handleAddOption = () => {
-        const updatedQuestions = [...questions];
-        if (updatedQuestions[questionIndex].options.length < 4) {
-            updatedQuestions[questionIndex].options.push('');
-            setQuestions(updatedQuestions);
-        }
-    };
-
     const handleQuizCreation = async () => {
         console.log('Game Title:', gameTitle);
         console.log('Game Description:', gameDescription);
@@ -80,10 +86,50 @@ export default function CreateQuizForm() {
     };
 
     return (
-        <Flex align={'center'} justify={'center'}>
+        <Flex align={'center'} justify={'center'} >
             <Stack spacing={8} mx={'auto'} py={12} px={6}>
                 <Heading fontSize={'4xl'}>Create a Quiz</Heading>
-                <Card minW={'60vw'} p={5} rounded={'lg'} boxShadow={'lg'}>
+                <Card w={'60vw'} minW={'60vw'} p={5} rounded={'lg'} boxShadow={'lg'}>
+                    <Stack direction="row" justify="center" mb={4} maxW={"100%"} wrap={'wrap'}>
+                        {[...Array(questions.length + 1)].map((_, index) => (
+                            <Button
+                                key={index}
+                                colorScheme="blue"
+                                variant={step === index + 1 ? 'solid' : 'outline'}
+                                onClick={() => handleJumpToStep(index + 1)}
+                                px={2}
+                            >
+                                {index === 0 ? 'Game Info' : `Question ${index}`}
+                                {
+                                    index > 0 && questions.length > 1 && (
+                                        <IconButton
+                                            ml={1}
+                                            variant={'ghost'}
+                                            h={'30px'}
+                                            color={'red'}
+                                            icon={<CloseIcon />}
+                                            aria-label='Remove'
+                                            onClick={(event) => {
+                                                event.stopPropagation();
+                                                handleRemoveQuestion(index-1);
+                                            }}
+                                        />
+                                    )
+                                }
+
+                            </Button>
+                        ))}
+                        <Button colorScheme="blue" variant={'solid'} onClick={handleAddQuestion}>
+                            Add Question
+                        </Button>
+                        <Button
+                            colorScheme="green"
+                            variant={'solid'}
+                            onClick={handleQuizCreation}
+                        >
+                            Save Quiz
+                        </Button>
+                    </Stack>
                     {step === 1 && (
                         <>
                             <FormControl id="gameTitle">
@@ -118,9 +164,14 @@ export default function CreateQuizForm() {
                     {step >= 2 && (
                         <>
                             <FormControl id={`question${questionIndex}`}>
-                                <FormLabel>{`Question ${questionIndex + 1}`}</FormLabel>
+                                <Flex>
+                                    <FormLabel>{`Question ${questionIndex + 1}`}</FormLabel>
+                                </Flex>
                                 <Input
                                     type="text"
+                                    placeholder={`Question ${questionIndex + 1} text...`}
+                                    required
+                                    isRequired
                                     value={questions[questionIndex].question}
                                     onChange={(e) => handleQuestionChange(e.target.value)}
                                 />
@@ -132,6 +183,8 @@ export default function CreateQuizForm() {
                                             <Input
                                                 type="text"
                                                 value={option}
+                                                required={optionIndex < 2}
+                                                placeholder={`Option ${optionIndex + 1} ${optionIndex > 1 ? '(Optional)' : ''}`}
                                                 onChange={(e) => handleOptionChange(optionIndex, e.target.value)}
                                             />
                                         </FormControl>
@@ -144,34 +197,39 @@ export default function CreateQuizForm() {
                                         />
                                     </Flex>
                                 ))}
-                                {questions[questionIndex].options.length < 4 && (
-                                    <Button colorScheme="blue" onClick={handleAddOption}>
-                                        Add Option
-                                    </Button>
-                                )}
                             </Grid>
 
 
                             {
                                 questionIndex === questions.length - 1 ? (
                                     <>
-                                        <Button mt={4} colorScheme="green" onClick={handleQuizCreation}>
+                                        <Stack direction={'row'}>
+                                            <Button mt={4} colorScheme="red" onClick={handlePreviousStep} flexGrow={1}>
+                                                Previous Question
+                                            </Button>
+                                            <Button mt={4} colorScheme="blue" onClick={handleAddQuestion} flexGrow={1}>
+                                                Add Question
+                                            </Button>
+                                        </Stack>
+
+                                        <Button mt={4} colorScheme="green" onClick={handleQuizCreation} flexGrow={1}>
                                             Save Quiz
                                         </Button>
-                                        <Button mt={4} colorScheme="blue" onClick={handleAddQuestion}>
-                                            Add More Questions
+                                    </>) :
+                                    <Stack direction={'row'}>
+                                        {step > 0 && (
+                                            <Button mt={4} colorScheme="red" onClick={handlePreviousStep} flexGrow={1}>
+                                                Previous Question
+                                            </Button>
+                                        )}
+                                        <Button mt={4} colorScheme="blue" onClick={handleNextStep} flexGrow={1}>
+                                            Next Question
                                         </Button>
 
-                                    </>) : <Button mt={4} colorScheme="blue" onClick={handleNextStep}>
-                                    Next Question
-                                </Button>
+                                    </Stack>
                             }
 
-                            {step > 0 && (
-                                <Button mt={4} colorScheme="red" onClick={handlePreviousStep}>
-                                    Previous Question
-                                </Button>
-                            )}
+
                         </>
                     )}
                 </Card>
