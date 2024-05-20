@@ -22,12 +22,21 @@ class QuizViewSet(mixins.CreateModelMixin, mixins.RetrieveModelMixin, mixins.Upd
             return self.queryset.filter(is_published=True)
 
     def create(self, request, *args, **kwargs):
+        request.data['creator'] = request.user.uuid
+
+        questions_data = request.data.pop('questions', [])
+
         serializer = self.get_serializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save(creator=request.user)
-            return response.Response(serializer.data, status=status.HTTP_201_CREATED)  # noqa E501
-        else:
-            return response.Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)  # noqa E501
+        serializer.is_valid(raise_exception=True)
+        quiz = serializer.save()
+
+        for question_data in questions_data:
+            options_data = question_data.pop('options', [])
+            question = Question.objects.create(quiz=quiz, **question_data)
+            for option_data in options_data:
+                Option.objects.create(question=question, **option_data)
+
+        return response.Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def delete(self, request, *args, **kwargs):
         quiz = self.get_object()
