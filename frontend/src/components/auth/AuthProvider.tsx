@@ -1,7 +1,7 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import { jwtDecode } from "jwt-decode";
 import { ACCESS_TOKEN, REFRESH_TOKEN } from '../../constants';
-import { Login } from './services.tsx/login';
+import { Login } from './services/login';
 import { apiRoutes } from '../../services/apiRoutes';
 import api from '../../services/api';
 

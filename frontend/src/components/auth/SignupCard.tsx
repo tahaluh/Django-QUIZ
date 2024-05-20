@@ -18,7 +18,7 @@ import { ViewIcon, ViewOffIcon } from '@chakra-ui/icons';
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Routes from '../../routes/Routes';
-import { Register } from './services.tsx/register';
+import { Register } from './services/register';
 
 export default function SignupCard() {
     const [loading, setLoading] = useState(false);
