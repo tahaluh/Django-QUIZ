@@ -60,11 +60,19 @@ export default function CreateQuizForm() {
                 setGameTitle(title);
                 setGameDescription(description);
                 setGameImage(image || '');
-                setQuestions(questions?.map((question: Question) => ({
-                    question: question.question,
-                    options: question.options.map((option: Option) => option.option as string),
-                    correctOption: question.options.findIndex((option: Option) => option.correct_option),
-                })) ?? [{ question: '', options: ['', '', '', ''], correctOption: 0 }]);
+                setQuestions(questions?.map((question: Question) => {
+                    const options = question.options.map((option: Option) => option.option as string);
+                    if (options.length < 4) {
+                        while (options.length < 4) {
+                            options.push('');
+                        }
+                    }
+                    return ({
+                        question: question.question,
+                        options: options,
+                        correctOption: question.options.findIndex((option: Option) => option.correct_option),
+                    })
+                }) ?? [{ question: '', options: ['', '', '', ''], correctOption: 0 }]);
             }
         };
         fetchQuiz();
@@ -127,11 +135,18 @@ export default function CreateQuizForm() {
         const titleErrorObj = titleError ? { gameTitle: titleError } : { gameTitle: '' };
         const descriptionErrorObj = descriptionError ? { gameDescription: descriptionError } : { gameDescription: '' };
 
-        const questionErrors = questions.map(
-            (question) => !question.question.trim() || question.options.filter((option) => option.trim()).length < 2
-                ? 'Each question must have a valid question text and at least 2 options.'
-                : ''
-        );
+        const questionErrors = questions.map((question) => {
+            const hasEmptyQuestionText = !question.question.trim();
+            const hasLessThanTwoOptions = question.options.filter((option) => option.trim()).length < 2;
+            const hasNoCorrectOption = question.correctOption !== 0 && !question.options[question.correctOption].trim();
+        
+            if (hasEmptyQuestionText || hasLessThanTwoOptions || hasNoCorrectOption) {
+                return 'Each question must have a valid question text, at least 2 options, and one option marked as correct.';
+            }
+        
+            return '';
+        });
+        
 
         const questionErrorsObj = questionErrors.reduce((acc, error, index) => {
             if (error) {

@@ -53,6 +53,8 @@ class QuizViewSet(mixins.CreateModelMixin, mixins.RetrieveModelMixin, mixins.Upd
             options_data = question_data.pop('options', [])
             question = Question.objects.create(quiz=quiz, **question_data)
             for option_data in options_data:
+                if option_data['option'] == '':
+                    continue
                 Option.objects.create(question=question, **option_data)
 
         return response.Response(serializer.data, status=status.HTTP_201_CREATED)  # noqa E501
@@ -73,6 +75,8 @@ class QuizViewSet(mixins.CreateModelMixin, mixins.RetrieveModelMixin, mixins.Upd
             options_data = question_data.pop('options', [])
             question = Question.objects.create(quiz=quiz, **question_data)
             for option_data in options_data:
+                if option_data['option'] == '':
+                    continue
                 Option.objects.create(question=question, **option_data)
         return response.Response(serializer.data, status=status.HTTP_200_OK)
 
