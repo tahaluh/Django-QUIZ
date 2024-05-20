@@ -2,6 +2,6 @@ export const apiRoutes = {
     auth: {
         login: 'auth/token/',
         register: 'user/register',
-        refreshToken: "auth/token/refresh"
+        refreshToken: "auth/token/refresh/"
     },
 } as const;

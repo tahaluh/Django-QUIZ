@@ -69,6 +69,7 @@ export default function LoginCard() {
                                 align={'start'}
                                 justify={'space-between'}>
                                 <Link color={'blue.400'}>Forgot password?</Link>
+                                <Link color={'blue.400'} onClick={() => navigate(Routes.auth.register)}>Create an account</Link>
                             </Stack>
                             <Button
                                 bg={'blue.400'}

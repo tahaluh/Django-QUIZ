@@ -5,7 +5,7 @@ import Page from "../template/components/Page";
 function RegisterPage() {
     return (
         <Page title="Register">
-            <Container maxW={'xl'}>
+            <Container minW={"100vw"}>
                 <SignupCard />
             </Container>
         </Page>
