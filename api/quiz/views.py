@@ -62,7 +62,9 @@ class QuizViewSet(mixins.CreateModelMixin, mixins.RetrieveModelMixin, mixins.Upd
     # a method to togle the is_published field of a quiz
     @decorators.action(detail=True, methods=['post'])
     def publish(self, request, pk=None):
-        quiz = self.get_object()
+        print('publish')
+        quiz = Quiz.objects.get(pk=pk)
+        print(quiz)
         if quiz is None:
             return response.Response(status=status.HTTP_404_NOT_FOUND)
         if quiz.creator != request.user:

@@ -6,6 +6,7 @@ import { Quiz } from './services/types';
 import { CloseIcon, EditIcon } from '@chakra-ui/icons';
 import { deleteQuiz } from './services/deleteQuiz';
 import { useSnackbar } from 'notistack'
+import { publishQuiz } from './services/publishQuiz';
 
 interface QuizCardProps {
     own?: boolean;
@@ -39,9 +40,15 @@ function QuizCard({ quiz, own = false, refetch }: QuizCardProps) {
         onDeleteModalClose();
     };
 
-    const handleConfirmToggle = () => {
-        console.log('Toggle confirmed');
-        // Implement logic to toggle publish state
+    const handleConfirmToggle = async () => {
+        const res = await publishQuiz(quiz.uuid);
+        if (res) {
+            enqueueSnackbar(`Quiz ${quiz.is_published ? 'unpublished' : 'published'} successfully`, { variant: 'success' });
+            refetch && refetch();
+        } else {
+            enqueueSnackbar(`Failed to ${quiz.is_published ? 'unpublish' : 'publish'} quiz`, { variant: 'error' });
+        }
+
         onToggleModalClose();
     };
 
@@ -62,7 +69,7 @@ function QuizCard({ quiz, own = false, refetch }: QuizCardProps) {
                     />
                     <MenuList>
                         <MenuItem icon={<EditIcon />} onClick={handleTogglePublished}>
-                            {quiz.published ? 'Unpublish' : 'Publish'}
+                            {quiz.is_published ? 'Unpublish' : 'Publish'}
                         </MenuItem>
                         <MenuItem icon={<EditIcon />} onClick={() => { navigate(Routes.quiz.edit(quiz.uuid)); }}>Edit</MenuItem>
                         <MenuItem icon={<CloseIcon />} onClick={handleDelete}>Delete</MenuItem>
@@ -96,10 +103,10 @@ function QuizCard({ quiz, own = false, refetch }: QuizCardProps) {
             <Modal isOpen={isToggleModalOpen} onClose={onToggleModalClose}>
                 <ModalOverlay />
                 <ModalContent>
-                    <ModalHeader>{quiz.published ? 'Unpublish' : 'Publish'}</ModalHeader>
+                    <ModalHeader>{quiz.is_published ? 'Unpublish' : 'Publish'}</ModalHeader>
                     <ModalCloseButton />
                     <ModalBody>
-                        {`Are you sure you want to ${quiz.published ? 'unpublish' : 'publish'} this quiz?`}
+                        {`Are you sure you want to ${quiz.is_published ? 'unpublish' : 'publish'} this quiz?`}
                     </ModalBody>
                     <ModalFooter>
                         <Button colorScheme="red" mr={3} onClick={onToggleModalClose}>

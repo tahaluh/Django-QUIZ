@@ -8,6 +8,7 @@ export const apiRoutes = {
     quiz: {
         create: 'quiz/',
         delete: (uuid: string) => `quiz/${uuid}/`,
+        publish: (uuid: string) => `quiz/${uuid}/publish/`,
         myQuizzes: 'quiz/mine/',
     },
 } as const;
