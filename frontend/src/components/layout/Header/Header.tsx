@@ -1,4 +1,3 @@
-import React from 'react';
 import {
     Box,
     Flex,
@@ -6,10 +5,10 @@ import {
     Button,
     Text,
 } from '@chakra-ui/react';
-import { AddIcon } from '@chakra-ui/icons';
 import UserMenu from './UserMenu';
 import { useNavigate } from 'react-router-dom';
 import Routes from '../../../routes/Routes';
+import NewQuizButton from '../../quiz/NewQuizButton';
 
 export default function Header() {
     const navigate = useNavigate();
@@ -31,17 +30,14 @@ export default function Header() {
                     </HStack>
                     <Text fontSize={'2xl'} fontWeight={'bold'}>Django Quiz</Text>
                     <Flex alignItems={'center'}>
-                        <Button
-                            variant={'solid'}
-                            colorScheme={'green'}
-                            size={'sm'}
-                            mr={4}
-                            leftIcon={<AddIcon />}
-                            onClick={() => navigate(Routes.quiz.create)}
-                        >
-                            New Quiz
-                        </Button>
-                        <UserMenu />
+                        <NewQuizButton display={
+                            {
+                                base: 'none',
+                                md: 'inline-flex'
+                            }
+                        } />
+                        <UserMenu>
+                        </UserMenu>
                     </Flex>
                 </Flex>
             </Box>
