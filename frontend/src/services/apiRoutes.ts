@@ -12,5 +12,6 @@ export const apiRoutes = {
         publish: (uuid: string) => `quiz/${uuid}/publish/`,
         myQuizzes: 'quiz/mine/',
         get: (uuid: string) => `quiz/${uuid}/`,
+        list: 'quiz/',
     },
 } as const;

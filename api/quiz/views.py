@@ -16,10 +16,9 @@ class QuizViewSet(mixins.CreateModelMixin, mixins.RetrieveModelMixin, mixins.Upd
         return [permission() for permission in permission_classes]
 
     def get_queryset(self):
-        if self.action == 'list' and self.request.user.is_authenticated:
-            return self.queryset.filter(creator=self.request.user)
-        else:
+        if self.action == 'list':
             return self.queryset.filter(is_published=True)
+        return self.queryset.all()
 
     def retrieve(self, request, *args, **kwargs):
         quiz = Quiz.objects.get(pk=kwargs['pk'])

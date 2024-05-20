@@ -29,6 +29,11 @@ const UserMenu = () => {
                 </Center>
                 <MenuDivider />
                 <MenuItem
+                    onClick={() => navigate(Routes.quiz.myQuizzes)}
+                >
+                    My Quizzes
+                </MenuItem>
+                <MenuItem
                     display={
                         {
                             base: 'inline-flex',

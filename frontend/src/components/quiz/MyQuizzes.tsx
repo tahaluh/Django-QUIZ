@@ -1,4 +1,4 @@
-import { Box, Input, Grid, GridItem } from '@chakra-ui/react';
+import { Box, Grid, GridItem } from '@chakra-ui/react';
 import QuizCard from './QuizCard';
 import { getMyQuizzes } from './services/getMyQuizzes';
 import { Quiz } from './services/types';
