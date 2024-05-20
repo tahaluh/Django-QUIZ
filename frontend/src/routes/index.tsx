@@ -9,6 +9,7 @@ import ProtectedRoute from "../components/ProtectedRoute";
 import Layout from "../components/layout/Layout";
 import CreateQuizPage from "../pages/quiz/CreateQuiz";
 import MyQuizzesPage from "../pages/quiz/MyQuizzes";
+import AnswerQuizPage from "../pages/quiz/AnswerQuiz";
 
 interface RenderRouteParams {
     layout?: boolean;
@@ -49,6 +50,10 @@ export default function Router() {
         {
             path: Routes.quiz.edit(':quizUuid'),
             element: renderRoute(<CreateQuizPage />),
+        },
+        {
+            path: Routes.quiz.play(':quizUuid'),
+            element: renderRoute(<AnswerQuizPage />),
         },
         {
             path: Routes.quiz.myQuizzes,

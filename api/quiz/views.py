@@ -127,6 +127,25 @@ class QuestionViewSet(viewsets.ModelViewSet):
         serializer = OptionSerializer(question.options.all(), many=True)
         return response.Response(serializer.data, status=status.HTTP_200_OK)
 
+    @decorators.action(detail=True, methods=['post'])
+    def validate(self, request, pk=None):
+        # return both is_correct and correct_option_uuid, thta just existis in the option object
+        question = Question.objects.get(pk=pk)
+        if question is None:
+            return response.Response(status=status.HTTP_404_NOT_FOUND)
+        option_uuid = request.data.get('option_uuid')
+        option = Option.objects.get(pk=option_uuid)
+        if option is None:
+            return response.Response(status=status.HTTP_404_NOT_FOUND)
+        if option.question != question:
+            return response.Response(status=status.HTTP_400_BAD_REQUEST)
+        # find the correct option
+        correct_option = question.options.filter(correct_option=True).first()
+        if correct_option is None:
+            return response.Response(status=status.HTTP_400_BAD_REQUEST)
+        is_correct = correct_option == option
+        return response.Response({'right_answer': is_correct, 'correct_option_uuid': correct_option.uuid})  # noqa E501
+
 
 class OptionViewSet(viewsets.ModelViewSet):
     queryset = Option.objects.all()

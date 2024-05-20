@@ -14,4 +14,8 @@ export const apiRoutes = {
         get: (uuid: string) => `quiz/${uuid}/`,
         list: 'quiz/',
     },
+
+    question: {
+        validateAnswer: (questionUuid: string) => `question/${questionUuid}/validate/`,
+    },
 } as const;
