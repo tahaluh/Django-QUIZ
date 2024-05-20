@@ -8,6 +8,7 @@ import Logout from "../pages/Logout";
 import ProtectedRoute from "../components/ProtectedRoute";
 import Layout from "../components/layout/Layout";
 import CreateQuizPage from "../pages/quiz/CreateQuiz";
+import MyQuizzesPage from "../pages/quiz/MyQuizzes";
 
 interface RenderRouteParams {
     layout?: boolean;
@@ -44,6 +45,10 @@ export default function Router() {
         {
             path: Routes.quiz.create,
             element: renderRoute(<CreateQuizPage />),
+        },
+        {
+            path: Routes.quiz.myQuizzes,
+            element: renderRoute(<MyQuizzesPage />),
         },
 
         // 404 route

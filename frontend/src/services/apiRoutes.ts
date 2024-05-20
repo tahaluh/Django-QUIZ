@@ -4,4 +4,8 @@ export const apiRoutes = {
         register: 'user/register',
         refreshToken: "auth/token/refresh/"
     },
+
+    quiz: {
+        create: 'quiz/',
+    },
 } as const;

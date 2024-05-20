@@ -9,6 +9,7 @@ const Routes = {
 
     quiz: {
         create: '/quiz/create',
+        myQuizzes: '/quiz/my',
         edit: (quizUuid: string) => `/quiz/${quizUuid}/edit`,
         play: (quizUuid: string) => `/quiz/${quizUuid}/play`,
         result: (quizUuid: string) => `/quiz/${quizUuid}/result`,

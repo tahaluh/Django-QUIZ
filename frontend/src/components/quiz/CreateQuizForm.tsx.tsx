@@ -19,7 +19,11 @@ import {
     ModalFooter,
     Text,
 } from '@chakra-ui/react';
+import { useSnackbar } from 'notistack'
 import { CloseIcon } from '@chakra-ui/icons';
+import { CreateQuiz } from './services/createQuiz';
+import { useNavigate } from 'react-router-dom';
+import Routes from '../../routes/Routes';
 
 interface Question {
     question: string;
@@ -28,6 +32,8 @@ interface Question {
 }
 
 export default function CreateQuizForm() {
+    const { enqueueSnackbar } = useSnackbar();
+    const navigate = useNavigate();
     const [step, setStep] = useState<number>(1);
     const [questionIndex, setQuestionIndex] = useState<number>(0);
     const [gameTitle, setGameTitle] = useState<string>('');
@@ -116,10 +122,23 @@ export default function CreateQuizForm() {
             return;
         }
 
-        console.log('Game Title:', gameTitle);
-        console.log('Game Description:', gameDescription);
-        console.log('Game Image:', gameImage);
-        console.log('Questions:', questions);
+        const res = await CreateQuiz({
+            title: gameTitle,
+            description: gameDescription,
+            questions: questions.map((question) => ({
+                question: question.question,
+                options: question.options.map((option, optionIndex) => ({ option, correct_option: question.correctOption === optionIndex })),
+            })),
+        });
+
+        if (res.error) {
+            enqueueSnackbar(res.error, { variant: 'error' });
+            console.error(res.error);
+            return;
+        } else {
+            enqueueSnackbar('Quiz created successfully', { variant: 'success' });
+            navigate(Routes.quiz.myQuizzes)
+        }
     };
 
     // Validation errors
