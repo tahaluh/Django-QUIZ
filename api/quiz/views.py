@@ -21,6 +21,26 @@ class QuizViewSet(mixins.CreateModelMixin, mixins.RetrieveModelMixin, mixins.Upd
         else:
             return self.queryset.filter(is_published=True)
 
+    def retrieve(self, request, *args, **kwargs):
+        quiz = Quiz.objects.get(pk=kwargs['pk'])
+        if quiz is None:
+            return response.Response(status=status.HTTP_404_NOT_FOUND)
+        if not quiz.is_published and quiz.creator != request.user:
+            return response.Response(status=status.HTTP_404_NOT_FOUND)
+        # if the creator is requesting the quiz, return all the questions and options
+        if quiz.creator == request.user:
+            serializer = self.get_serializer(quiz)
+
+            return response.Response(serializer.data)
+        else:
+            # if the quiz is published, return only the questions and options without the correct_option field
+            serializer = self.get_serializer(quiz)
+            data = serializer.data
+            for question in data['questions']:
+                for option in question['options']:
+                    option.pop('correct_option')
+            return response.Response(data)
+
     def create(self, request, *args, **kwargs):
         request.data['creator'] = request.user.uuid
 
@@ -37,6 +57,25 @@ class QuizViewSet(mixins.CreateModelMixin, mixins.RetrieveModelMixin, mixins.Upd
                 Option.objects.create(question=question, **option_data)
 
         return response.Response(serializer.data, status=status.HTTP_201_CREATED)  # noqa E501
+
+    def update(self, request, *args, **kwargs):
+        quiz = Quiz.objects.get(pk=kwargs['pk'])
+        if quiz is None:
+            return response.Response(status=status.HTTP_404_NOT_FOUND)
+        if quiz.creator != request.user:
+            return response.Response(status=status.HTTP_403_FORBIDDEN)
+        questions_data = request.data.pop('questions', [])
+        serializer = self.get_serializer(quiz, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        quiz = serializer.save()
+        # delete all the questions and options of the quiz
+        quiz.questions.all().delete()
+        for question_data in questions_data:
+            options_data = question_data.pop('options', [])
+            question = Question.objects.create(quiz=quiz, **question_data)
+            for option_data in options_data:
+                Option.objects.create(question=question, **option_data)
+        return response.Response(serializer.data, status=status.HTTP_200_OK)
 
     def destroy(self, request, *args, **kwargs):
         quiz = Quiz.objects.get(pk=kwargs['pk'])

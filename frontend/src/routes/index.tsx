@@ -47,6 +47,10 @@ export default function Router() {
             element: renderRoute(<CreateQuizPage />),
         },
         {
+            path: Routes.quiz.edit(':quizUuid'),
+            element: renderRoute(<CreateQuizPage />),
+        },
+        {
             path: Routes.quiz.myQuizzes,
             element: renderRoute(<MyQuizzesPage />),
         },

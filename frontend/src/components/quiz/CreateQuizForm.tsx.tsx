@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
     Flex,
     FormControl,
@@ -22,10 +22,13 @@ import {
 import { useSnackbar } from 'notistack'
 import { CloseIcon } from '@chakra-ui/icons';
 import { CreateQuiz } from './services/createQuiz';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import Routes from '../../routes/Routes';
+import { getQuiz } from './services/getQuiz';
+import { Option, Question } from './services/types';
+import { updateQuiz } from './services/updateQuiz';
 
-interface Question {
+interface CreateQuestion {
     question: string;
     options: string[];
     correctOption: number;
@@ -34,12 +37,38 @@ interface Question {
 export default function CreateQuizForm() {
     const { enqueueSnackbar } = useSnackbar();
     const navigate = useNavigate();
+    const { quizUuid } = useParams()
     const [step, setStep] = useState<number>(1);
     const [questionIndex, setQuestionIndex] = useState<number>(0);
     const [gameTitle, setGameTitle] = useState<string>('');
     const [gameDescription, setGameDescription] = useState<string>('');
     const [gameImage, setGameImage] = useState<string>('');
-    const [questions, setQuestions] = useState<Question[]>([{ question: '', options: ['', '', '', ''], correctOption: 0 }]);
+    const [questions, setQuestions] = useState<CreateQuestion[]>([{ question: '', options: ['', '', '', ''], correctOption: 0 }]);
+
+    useEffect(() => {
+        const fetchQuiz = async () => {
+            if (quizUuid) {
+                const res = await getQuiz(quizUuid);
+                if (res.error) {
+                    enqueueSnackbar(res.error, { variant: 'error' });
+                    console.error(res.error);
+                    navigate(Routes.quiz.myQuizzes);
+                    return;
+                }
+                if (!res.data) return;
+                const { title, description, image, questions } = res.data;
+                setGameTitle(title);
+                setGameDescription(description);
+                setGameImage(image || '');
+                setQuestions(questions?.map((question: Question) => ({
+                    question: question.question,
+                    options: question.options.map((option: Option) => option.option as string),
+                    correctOption: question.options.findIndex((option: Option) => option.correct_option),
+                })) ?? [{ question: '', options: ['', '', '', ''], correctOption: 0 }]);
+            }
+        };
+        fetchQuiz();
+    }, [quizUuid]);
 
     const handleNextStep = () => {
         setStep((prevStep) => {
@@ -92,7 +121,7 @@ export default function CreateQuizForm() {
         setQuestions(updatedQuestions);
     };
 
-    const handleQuizCreation = async () => {
+    const handleSaveQuiz = async () => {
         const titleError = !gameTitle.trim() ? 'Please provide a valid game title.' : '';
         const descriptionError = !gameDescription.trim() ? 'Please provide a valid game description.' : '';
         const titleErrorObj = titleError ? { gameTitle: titleError } : { gameTitle: '' };
@@ -122,22 +151,42 @@ export default function CreateQuizForm() {
             return;
         }
 
-        const res = await CreateQuiz({
-            title: gameTitle,
-            description: gameDescription,
-            questions: questions.map((question) => ({
-                question: question.question,
-                options: question.options.map((option, optionIndex) => ({ option, correct_option: question.correctOption === optionIndex })),
-            })),
-        });
+        if (quizUuid) {
+            const res = await updateQuiz(quizUuid, {
+                title: gameTitle,
+                description: gameDescription,
+                questions: questions.map((question) => ({
+                    question: question.question,
+                    options: question.options.map((option, optionIndex) => ({ option, correct_option: question.correctOption === optionIndex })),
+                })),
+            });
 
-        if (res.error) {
-            enqueueSnackbar(res.error, { variant: 'error' });
-            console.error(res.error);
-            return;
+            if (res.error) {
+                enqueueSnackbar(res.error, { variant: 'error' });
+                console.error(res.error);
+                return;
+            } else {
+                enqueueSnackbar('Quiz updated successfully', { variant: 'success' });
+                navigate(Routes.quiz.myQuizzes)
+            }
         } else {
-            enqueueSnackbar('Quiz created successfully', { variant: 'success' });
-            navigate(Routes.quiz.myQuizzes)
+            const res = await CreateQuiz({
+                title: gameTitle,
+                description: gameDescription,
+                questions: questions.map((question) => ({
+                    question: question.question,
+                    options: question.options.map((option, optionIndex) => ({ option, correct_option: question.correctOption === optionIndex })),
+                })),
+            });
+
+            if (res.error) {
+                enqueueSnackbar(res.error, { variant: 'error' });
+                console.error(res.error);
+                return;
+            } else {
+                enqueueSnackbar('Quiz created successfully', { variant: 'success' });
+                navigate(Routes.quiz.myQuizzes)
+            }
         }
     };
 
@@ -316,7 +365,7 @@ export default function CreateQuizForm() {
                         <Button colorScheme='red' mr={3} onClick={onSaveModalClose}>Cancel</Button>
                         <Button colorScheme="green" onClick={() => {
                             onSaveModalClose();
-                            handleQuizCreation();
+                            handleSaveQuiz();
                         }}>
                             Save
                         </Button>
