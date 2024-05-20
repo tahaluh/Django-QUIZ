@@ -7,6 +7,7 @@ import NotFound from "../pages/NotFound";
 import Logout from "../pages/Logout";
 import ProtectedRoute from "../components/ProtectedRoute";
 import Layout from "../components/layout/Layout";
+import CreateQuizPage from "../pages/quiz/CreateQuiz";
 
 interface RenderRouteParams {
     layout?: boolean;
@@ -25,6 +26,7 @@ export default function Router() {
             path: Routes.home,
             element: renderRoute(<Home />),
         },
+        // auth routes
         {
             path: Routes.auth.login,
             element: <LoginPage />,
@@ -37,6 +39,14 @@ export default function Router() {
             path: Routes.auth.logout,
             element: <Logout />,
         },
+
+        // Quiz routes
+        {
+            path: Routes.quiz.create,
+            element: renderRoute(<CreateQuizPage />),
+        },
+
+        // 404 route
         {
             path: '*',
             element: <NotFound />,
